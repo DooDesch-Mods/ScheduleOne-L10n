@@ -28,7 +28,12 @@ else keeps its built-in text), and a file alone adds a whole new language. To fo
 language regardless of your OS, set `Language` under `[DooDesch]` in
 `UserData/MelonPreferences.cfg` (`auto`, `en`, `de`, `fr`, ...).
 
-The full step-by-step guide lives in the [wiki](https://github.com/DooDesch-Mods/ScheduleOne-L10n/wiki).
+Made a full translation? You can publish it as its own **translation mod** on
+Thunderstore or Nexus - a code-less package shipping
+`Mods/Localization/<ModName>/<code>.json`. Everyone who installs it gets your
+translation automatically; their own files still win over yours if they edit lines.
+
+The full step-by-step guides live in the [wiki](https://github.com/DooDesch-Mods/ScheduleOne-L10n/wiki).
 
 ## For modders: adopt it in three steps 🔧
 
@@ -71,6 +76,10 @@ Details, design notes and the adoption checklist are in the
 3. Everything else: `en`.
 
 The language is resolved once per session; changing it needs a game restart.
+
+For the resolved language, translations merge per entry from three sources, later wins:
+built-in tables < installed translation mods (`Mods/Localization/...`) < the player's
+own file (`UserData/DooDesch/Localization/...`).
 
 ## Mods using it
 

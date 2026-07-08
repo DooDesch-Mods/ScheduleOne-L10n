@@ -17,12 +17,15 @@ namespace DooDesch.Localization
     /// Unknown keys (and unknown languages) fall back to the English literal unchanged, so a
     /// mod without tables behaves exactly as before.
     ///
-    /// Players can add or override translations without touching the mod:
-    ///   UserData/DooDesch/Localization/&lt;ModName&gt;/&lt;code&gt;.json  (e.g. .../RVRepairVan/fr.json)
-    /// A flat JSON object mapping the English source text to the translation. On startup the mod
-    /// writes _template.en.json into that folder listing every translatable string - copy it,
-    /// rename it to a language code and translate the values. User entries win over built-in
-    /// ones, and a user file alone is enough to add a whole new language.
+    /// Translations can come from three places; later sources win per entry:
+    ///   1. tables registered in code (shipped with the mod),
+    ///   2. translation-mod packs: Mods/Localization/&lt;ModName&gt;/&lt;code&gt;.json - lets anyone
+    ///      publish a translation as its own code-less Thunderstore/Nexus package,
+    ///   3. the player's own file: UserData/DooDesch/Localization/&lt;ModName&gt;/&lt;code&gt;.json.
+    /// Files are flat JSON objects mapping the English source text to the translation. On
+    /// startup the mod writes _template.en.json into the UserData folder listing every
+    /// translatable string - copy it, rename it to a language code and translate the values.
+    /// A file alone is enough to add a whole new language.
     ///
     /// The game itself has no language setting (as of v0.4.5f2 it ships no localization system
     /// at all), so "auto" resolves via the OS language. All DooDesch mods share ONE
@@ -56,9 +59,9 @@ namespace DooDesch.Localization
         /// <summary>Translate + string.Format for lines with runtime values, e.g. T("Pay ${0}", fee).</summary>
         internal static string T(string en, params object[] args) => string.Format(T(en), args);
 
-        // Built-in table for the resolved language, overlaid with the player's own translation
-        // file (user entries win). Also drops the key template next to it so translators always
-        // have a current list of every string this mod can localize.
+        // Built-in table for the resolved language, overlaid with translation-mod packs and
+        // then the player's own file (the player wins). Also drops the key template into the
+        // UserData folder so translators always have a current list of this mod's strings.
         private static Dictionary<string, string> BuildActiveTable()
         {
             var table = _tables.TryGetValue(Language, out var builtIn)
@@ -67,22 +70,31 @@ namespace DooDesch.Localization
             try
             {
                 ExportTemplate();
-                string file = Path.Combine(UserDir(), Language + ".json");
-                if (File.Exists(file))
-                {
-                    var user = ParseJsonObject(File.ReadAllText(file));
-                    if (user == null)
-                        MelonLogger.Warning("[L10n] ignoring invalid translation file (flat JSON object of \"english\": \"translated\" strings expected): " + file);
-                    else
-                        foreach (var kv in user) table[kv.Key] = kv.Value;
-                }
+                Overlay(table, Path.Combine(PackDir(), Language + ".json"));   // installed translation mods
+                Overlay(table, Path.Combine(UserDir(), Language + ".json"));   // the player's own edits win
             }
             catch (Exception e) { MelonLogger.Warning("[L10n] user translations failed: " + e.Message); }
             return table;
         }
 
+        private static void Overlay(Dictionary<string, string> table, string file)
+        {
+            if (!File.Exists(file)) return;
+            var entries = ParseJsonObject(File.ReadAllText(file));
+            if (entries == null)
+                MelonLogger.Warning("[L10n] ignoring invalid translation file (flat JSON object of \"english\": \"translated\" strings expected): " + file);
+            else
+                foreach (var kv in entries) table[kv.Key] = kv.Value;
+        }
+
+        private static string ModName => typeof(L10n).Assembly.GetName().Name;
+
+        // Translation-mod packs install here (a code-less package shipping Mods/Localization/...).
+        private static string PackDir() => Path.Combine(
+            MelonEnvironment.ModsDirectory, "Localization", ModName);
+
         private static string UserDir() => Path.Combine(
-            MelonEnvironment.UserDataDirectory, "DooDesch", "Localization", typeof(L10n).Assembly.GetName().Name);
+            MelonEnvironment.UserDataDirectory, "DooDesch", "Localization", ModName);
 
         // _template.en.json = every translatable string this mod ships (the union of all registered
         // tables' keys; each key is the English source, so a fresh copy is a valid file as-is).
@@ -102,7 +114,9 @@ namespace DooDesch.Localization
                 "Copy this file to <language code>.json (for example fr.json), then translate the VALUES only" +
                 " - the keys are the mod's English source strings and must stay unchanged. Lines you remove" +
                 " simply keep their built-in text. Keep placeholders like {0} in your translation." +
-                " Set Language in MelonPreferences.cfg under [DooDesch] to force a language (auto = OS language).")).Append(",\n");
+                " Set Language in MelonPreferences.cfg under [DooDesch] to force a language (auto = OS language)." +
+                " To share your translation as an installable mod, see" +
+                " https://github.com/DooDesch-Mods/ScheduleOne-L10n/wiki")).Append(",\n");
             foreach (var k in keys)
                 sb.Append("  ").Append(Quote(k)).Append(": ").Append(Quote(k)).Append(",\n");
             sb.Length -= 2;   // trailing comma of the last entry
