@@ -96,10 +96,12 @@ namespace DooDesch.Localization
         private static string UserDir() => Path.Combine(
             MelonEnvironment.UserDataDirectory, "DooDesch", "Localization", ModName);
 
-        // _template.en.json = every translatable string this mod ships (the union of all registered
-        // tables' keys; each key is the English source, so a fresh copy is a valid file as-is).
-        // Rewritten every session so it always matches the installed mod version. The "_readme"
-        // entry is an ordinary unused key that simply never matches a source string.
+        // One _template.<code>.json per language the mod ships (plus "en", whose values are the
+        // keys themselves - every key is the English source, so a fresh copy is a valid file
+        // as-is). Templates are rewritten every session so they always match the installed mod
+        // version; that is exactly why they are templates and not live <code>.json files - a
+        // live file would either shadow updated built-in texts or wipe the player's edits.
+        // The "_readme" entry is an ordinary unused key that never matches a source string.
         private static void ExportTemplate()
         {
             if (_tables.Count == 0) return;   // no registered table - no key list to offer
@@ -109,21 +111,32 @@ namespace DooDesch.Localization
                     keys.Add(k);
             if (keys.Count == 0) return;
 
+            Directory.CreateDirectory(UserDir());
+            WriteTemplate("en", keys, null);
+            foreach (var lang in _tables.Keys)
+                if (lang != "en")
+                    WriteTemplate(lang, keys, _tables[lang]);
+        }
+
+        private static void WriteTemplate(string lang, SortedSet<string> keys, Dictionary<string, string> table)
+        {
             var sb = new StringBuilder();
             sb.Append("{\n  ").Append(Quote("_readme")).Append(": ").Append(Quote(
-                "Copy this file to <language code>.json (for example fr.json), then translate the VALUES only" +
-                " - the keys are the mod's English source strings and must stay unchanged. Lines you remove" +
-                " simply keep their built-in text. Keep placeholders like {0} in your translation." +
+                "This file is regenerated on every game start - do not edit it. To change or add a" +
+                " translation, copy it to <language code>.json (for example " + lang + ".json), keep only" +
+                " the lines you want to change, and translate the VALUES only - the keys are the mod's" +
+                " English source strings and must stay unchanged. Keep placeholders like {0}." +
                 " Set Language in MelonPreferences.cfg under [DooDesch] to force a language (auto = OS language)." +
                 " To share your translation as an installable mod, see" +
                 " https://github.com/DooDesch-Mods/ScheduleOne-L10n/wiki")).Append(",\n");
             foreach (var k in keys)
-                sb.Append("  ").Append(Quote(k)).Append(": ").Append(Quote(k)).Append(",\n");
+            {
+                string v = table != null && table.TryGetValue(k, out string s) ? s : k;
+                sb.Append("  ").Append(Quote(k)).Append(": ").Append(Quote(v)).Append(",\n");
+            }
             sb.Length -= 2;   // trailing comma of the last entry
             sb.Append("\n}\n");
-
-            Directory.CreateDirectory(UserDir());
-            File.WriteAllText(Path.Combine(UserDir(), "_template.en.json"), sb.ToString(), new UTF8Encoding(false));
+            File.WriteAllText(Path.Combine(UserDir(), "_template." + lang + ".json"), sb.ToString(), new UTF8Encoding(false));
         }
 
         private static string Detect()
