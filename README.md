@@ -1,6 +1,6 @@
 # ScheduleOne-L10n - Tiny Localization for Schedule I Mods
 
-> 🛟 **Need help or found a bug?** Get support at [support.doodesch.de](https://support.doodesch.de).
+> 🛟 **Need help or found a bug?** Get support at [support.doodesch.de/l10n](https://support.doodesch.de/l10n).
 
 > One C# file that gives your MelonLoader mod proper translations - built-in language
 > tables, player-editable JSON translation files, and automatic language detection.
