@@ -33,7 +33,7 @@ Thunderstore or Nexus - a code-less package shipping
 `Mods/Localization/<ModName>/<code>.json`. Everyone who installs it gets your
 translation automatically; their own files still win over yours if they edit lines.
 
-The full step-by-step guides live in the [wiki](https://github.com/DooDesch-Mods/ScheduleOne-L10n/wiki).
+The full step-by-step guides live in the [wiki](https://docs.doodesch.de/mods/l10n/).
 
 ## For modders: adopt it in three steps 🔧
 
@@ -66,7 +66,7 @@ ScheduleOne-L10n is a single-file library - copy [`L10n.cs`](L10n.cs) into your 
    L10n mod so players set it once.
 
 Details, design notes and the adoption checklist are in the
-[wiki](https://github.com/DooDesch-Mods/ScheduleOne-L10n/wiki).
+[wiki](https://docs.doodesch.de/mods/l10n/).
 
 ## How the language is picked
 
