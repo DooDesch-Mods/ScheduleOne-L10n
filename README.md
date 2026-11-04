@@ -29,7 +29,7 @@ language regardless of your OS, set `Language` under `[DooDesch]` in
 `UserData/MelonPreferences.cfg` (`auto`, `en`, `de`, `fr`, ...).
 
 Made a full translation? You can publish it as its own **translation mod** on
-Thunderstore or Nexus - a code-less package shipping
+Nexus or Thunderstore - a code-less package shipping
 `Mods/Localization/<ModName>/<code>.json`. Everyone who installs it gets your
 translation automatically; their own files still win over yours if they edit lines.
 
@@ -83,7 +83,7 @@ own file (`UserData/DooDesch/Localization/...`).
 
 ## Mods using it
 
-- [RVRepairVan](https://github.com/DooDesch-Mods/RVRepairVan) (English + German)
+- [RVRepairVan](https://www.nexusmods.com/schedule1/mods/280) (English + German)
 
 Using it in your own mod? Open an issue or ping me and I'll add you to the list.
 
